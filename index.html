@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Fernando Vélez - Part 2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+
+
+    <style>
+        h2 {
+            width: 100%;
+            text-align: center;
+            margin-top: 120px;
+            font-size: 3vw;
+            font-family: "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            font-weight: 300;
+        }
+
+        .call {
+            display: flex;
+            flex-direction: flex;
+        }
+
+        .results {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 90%;
+            justify-content: space-between;
+            margin: auto;
+            margin-top: 80px;
+        }
+
+        .eachItem {
+            display: flex;
+            flex-direction: column;
+            margin: 1vw;
+        }
+
+        .imgCatalogue {
+            height: 12vw;
+        }
+
+        .itemMaterials {
+            font-family: "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            -webkit-text-fill-color: #ffffff;
+            -webkit-text-stroke: 1px #fc0000;
+            position: 'relative';
+            margin: auto;
+            text-align: center;
+            width: 100%;
+            height: 12vw;
+            margin-top: -7vw;
+            opacity: 0;
+            transition: .2s;
+        }
+
+        .itemMaterials:hover {
+            display: block;
+            opacity: 1;
+            transition: .2s;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+        }
+
+        .button {
+            cursor: pointer;
+            padding: .5vw;
+            background: #848484;
+            color: #ffffff;
+            width: 6vw;
+            margin: 1vw;
+            text-align: center;
+            border-radius: 1vw;
+            font-size: 1.2vw;
+            font-family: "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+            font-weight: 300;
+            transition: .3s;
+        }
+
+        .button:hover {
+            background: #545454;
+            transition: .3s;
+        }
+
+        .center {
+            display: flex;
+            flex-direction: row;
+            margin: auto;
+            margin-top: 10vw;
+        }
+
+        .spinner {
+            display: block;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+
+            animation: spin 1s ease infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .searchContainer {
+            display: flex;
+            justify-content: center;
+        }
+
+        .searchText {
+            display: flex;
+            flex-direction: column;
+            margin: auto 0vw;
+            height: 1.5vw;
+        }
+
+        @media (max-width: 540px) {
+            h2 {
+                font-size: 10vw;
+                margin: 5vw auto;
+            }
+
+            .call {
+                display: flex;
+                flex-direction: column;
+                margin: 0vw;
+            }
+
+            .results {
+                margin: auto;
+                margin-top: 20px;
+            }
+
+            .eachItem {
+                align-items: center;
+                height: 34vh;
+                width: 100%;
+            }
+
+            .imgCatalogue {
+                height: 100%;
+                width: auto;
+            }
+
+            .itemMaterials {
+                margin-top: -10vw;
+                opacity: 1;
+            }
+
+            .button {
+                padding: 3vw 1vw;
+                width: 30vw;
+                margin: 2vw;
+                font-size: 4vw;
+            }
+
+            .searchContainer {
+                display: flex;
+                justify-content: center;
+            }
+
+            .searchText {
+                margin: 2vw 0vw;
+                height: auto;
+            }
+
+            .pagination {
+                margin: 5vw auto;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <h2>CATALOGUE</h2>
+    <div class="spinnerContainer">
+    </div>
+    <div class="call" id="call">
+        <div class="results hidden" id="results"></div>
+    </div>        
+    <div class="pagination">
+        <div class="button" id="previous">Previous</div>
+        <div class="button" id="next">Next</div>
+    </div>
+    <div class="searchContainer">
+        <div class="button" id="searchButton">Search</div>
+        <input type="text" class="searchText" id="searchText">
+    </div>
+
+    <script>   
+        function loader() {
+            const spinnerContainer = document.querySelector('.spinnerContainer')
+            const spinner = document.createElement('div');
+            spinner.classList.add('spinner');
+            spinner.classList.add('center');
+            spinner.id = 'spinner';
+            spinnerContainer.appendChild(spinner);
+        }    
+
+        function loaded() {
+            const loader = document.getElementById('spinner');
+            loader.remove();
+        }
+
+        let pagiNumber = '';
+
+        const catalogue = async() => {
+            try {
+                loader();
+                const url = 'https://api.airtable.com/v0/appElurJfZ2WmdIUg/Furniture/?api_key=keys1gmUsZYDi7y0g';
+                const resAPI = await fetch(url);
+                const data = await resAPI.json();
+                let itemCatalogue = '';
+
+                for(let i = 0; i < 5; i++) {
+                    const itemImage = data.records[i].fields.Images[0].url;
+                    const itemInfo = data.records[i].fields.Name;
+
+                    itemCatalogue += `
+                        <div class='eachItem'>
+                            <img class='imgCatalogue' src='${itemImage}'>
+                            <h3 class='itemMaterials'>${itemInfo}</h3>
+                        </div>    
+                    `;
+                    pagiNumber = i + 1;
+                }
+                document.getElementById('results').innerHTML = itemCatalogue;
+                loaded();
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        catalogue();
+
+        const nextButton = document.getElementById('next');
+
+        nextButton.addEventListener('click', () => {
+            nextPage();
+        })
+
+        const nextPage = async() => {
+            loader();
+            try {
+                const url = 'https://api.airtable.com/v0/appElurJfZ2WmdIUg/Furniture/?api_key=keys1gmUsZYDi7y0g';
+                const resAPI = await fetch(url);
+                const data = await resAPI.json();            
+                let itemCatalogue = '';
+
+                if (pagiNumber < data.records.length - 1){
+                    pagiNumber = pagiNumber + 5;
+
+
+                    for(let i = pagiNumber - 5; i < pagiNumber; i++) {
+                        const itemImage = data.records[i].fields.Images[0].url;
+                        const itemInfo = data.records[i].fields.Name;
+
+                        itemCatalogue += `
+                            <div class='eachItem'>
+                                <img class='imgCatalogue' src='${itemImage}'>
+                                <h3 class='itemMaterials'>${itemInfo}</h3>
+                            </div>    
+                        `;
+                    }
+                    document.getElementById('results').innerHTML = itemCatalogue;
+
+                }
+                loaded();
+            } catch (err) {
+                console.log(err)
+            }
+        }
+
+        const previousButton = document.getElementById('previous');
+
+        previousButton.addEventListener('click', () => {
+            previousPage();
+        })
+
+        const previousPage = async() => {
+            loader();
+            try {
+                const url = 'https://api.airtable.com/v0/appElurJfZ2WmdIUg/Furniture/?api_key=keys1gmUsZYDi7y0g';
+                const resAPI = await fetch(url);
+                const data = await resAPI.json();
+
+                if (pagiNumber > 5){
+                    pagiNumber = pagiNumber - 5;
+                    let itemCatalogue = '';
+
+                    for(let i = pagiNumber - 5; i < pagiNumber; i++) {
+
+                        const itemImage = data.records[i].fields.Images[0].url;
+                        const itemInfo = data.records[i].fields.Name;
+
+                        itemCatalogue += `
+                            <div class='eachItem'>
+                                <img class='imgCatalogue' src='${itemImage}'>
+                                <h3 class='itemMaterials'>${itemInfo}</h3>
+                            </div>    
+                        `;
+                    }
+
+                    document.getElementById('results').innerHTML = itemCatalogue;
+                }
+                loaded();
+            } catch (err) {
+                console.log(err)
+            }
+        }
+
+        const searchButton = document.getElementById('searchButton');
+        let inputValue;
+
+        searchButton.addEventListener('click', () => {
+            inputValue = document.getElementById('searchText').value;
+            findElements();
+        })
+
+        const findElements = async() => {
+            loader();
+            try {
+                const url = 'https://api.airtable.com/v0/appElurJfZ2WmdIUg/Furniture/?api_key=keys1gmUsZYDi7y0g';
+                const resAPI = await fetch(url);
+                const data = await resAPI.json();
+
+                let itemCatalogue = '';
+                
+                for(let i = 0; i < 5; i++) {
+
+                    const itemImage = data.records[i].fields.Images[0].url;
+                    const itemInfo = data.records;
+                    const itemName = data.records[i].fields.Name;               
+                    const result = itemInfo.some(item => itemName.includes(`${inputValue}`));
+
+                    if (result) {
+                        itemCatalogue += `
+                            <div class='eachItem'>
+                                <img class='imgCatalogue' src='${itemImage}'>
+                                <h3 class='itemMaterials'>${itemInfo[i].fields.Name}</h3>
+                            </div>    
+                        `;
+                        pagiNumber = i + 1;
+                    }
+                }
+                document.getElementById('results').innerHTML = itemCatalogue;
+                loaded();
+            } catch (err) {
+                console.log(err)
+            }
+        }
+    </script>
+</body>
+</html>
